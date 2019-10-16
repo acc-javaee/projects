@@ -1,19 +1,25 @@
 package edu.acc.jee.hubbub.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class User implements Serializable {
+    public static final String USERNAME_PATTERN = "^\\w{6,20}$";
+    
     private String username;
     private String passhash;
     private Date   joined;
-
+    private List<Post> posts = new ArrayList<>();
+    
     public User() {
     }
 
     public User(String username, String passhash) {
         this.username = username;
         this.passhash = passhash;
+        this.joined = new Date();
     }
 
     public User(String username, String passhash, Date joined) {
@@ -44,6 +50,14 @@ public class User implements Serializable {
 
     public void setJoined(Date joined) {
         this.joined = joined;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 
     @Override
