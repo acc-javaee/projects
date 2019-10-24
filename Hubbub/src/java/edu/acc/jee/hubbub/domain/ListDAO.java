@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ListDao implements DataService {
+public class ListDAO implements DataService {
     private List<User> users = new ArrayList<>();
     private List<Post> posts = new ArrayList<>();
 
