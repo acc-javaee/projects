@@ -42,7 +42,7 @@ public class ListDao implements DataService {
     }
 
     @Override
-    public synchronized boolean userExists(String username) {
+    public boolean userExists(String username) {
         return this.findUserByUsername(username) != null;
     }
 
