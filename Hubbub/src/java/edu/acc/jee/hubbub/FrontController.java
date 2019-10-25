@@ -2,6 +2,7 @@ package edu.acc.jee.hubbub;
 
 import edu.acc.jee.hubbub.domain.DataService;
 import edu.acc.jee.hubbub.domain.Post;
+import edu.acc.jee.hubbub.domain.User;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -24,11 +25,11 @@ public class FrontController extends HttpServlet {
         switch (action) {
             default:
             case "guest": destination = guest(request); break;
-            // case "login": destination = login(request); break;
-            // case "logout": destination = logout(request); break;
-            // case "join": destination = join(request); break;
-            // case "timeline": destination = timeline(request); break;
-            // case "post": destination = post(request); break;
+            case "login": destination = login(request); break;
+            case "logout": destination = logout(request); break;
+            case "join": destination = join(request); break;
+            case "timeline": destination = timeline(request); break;
+            case "post": destination = post(request); break;
         }
         
         String view;
@@ -91,14 +92,104 @@ public class FrontController extends HttpServlet {
     }// </editor-fold>
 
     private String guest(HttpServletRequest request) {
+        if (loggedIn(request)) return redirectTag + "timeline";
         List<Post> posts = getDataService().findPostsByPage(0, pageSize);
         request.setAttribute("posts", posts);
         return "guest";
     }
+    
+    private String logout(HttpServletRequest request) {
+        request.getSession().invalidate();
+        return redirectTag + "guest";
+    }
 
+    private String timeline(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        List<Post> posts = getDataService().findPostsByPage(0, pageSize);
+        request.setAttribute("posts", posts);
+        return "timeline";       
+    }
+ 
+    private String login(HttpServletRequest request) {
+        // logged in users can't log in again
+        if (loggedIn(request)) return redirectTag + "timeline";
+        // GETs to this action are requesting the form
+        if (request.getMethod().equalsIgnoreCase("GET")) return "login";
+        // Must be a POST if we get here; build a DTO and validate
+        UserDTO dto = new UserDTO(
+                request.getParameter("username"),
+                request.getParameter("password")
+        );
+        if (!dto.isValid()) {
+            request.setAttribute("flash", "Access Denied!");
+            return "login";
+        }
+        // DTO is valid; is this a user and do they know their password
+        DataService dao = this.getDataService();
+        User user = dao.findUserByUserDTO(dto);
+        if (user == null) {
+            request.setAttribute("flash", "Access Denied!");
+            return "login";
+        }
+        // User is authentic; start a session and redirect to timeline
+        request.getSession().setAttribute("user", user);
+        return redirectTag + "timeline";
+    }
+
+    private String join(HttpServletRequest request) {
+        if (loggedIn(request)) return redirectTag + "timeline";
+        if (request.getMethod().equalsIgnoreCase("GET")) return "join";
+        String username = request.getParameter("username");
+        String password1 = request.getParameter("password1");
+        String password2 = request.getParameter("password2");
+        if (password1 == null || password2 == null || !password1.equals(password2)) {
+            request.setAttribute("flash", "Passwords don't match.");
+            return "join";
+        }
+        UserDTO dto = new UserDTO(username, password1);
+        if (!dto.isValid()) {
+            request.setAttribute("flash", "Username or password is invalid.");
+            return "join";
+        }
+        DataService dao = this.getDataService();
+        if (dao.userExists(dto.getUsername())) {
+            request.setAttribute("flash", "That username is unavailable.");
+            return "join";
+        }
+        User user = dao.addUser(dto);
+        request.getSession().setAttribute("user", user);
+        return redirectTag + "timeline";
+    }
+
+    private String post(HttpServletRequest request) {
+        User user = this.getSessionUser(request);
+        if (user == null) return redirectTag + "guest";
+        if (request.getMethod().equalsIgnoreCase("GET")) return "post";
+        String content = request.getParameter("content");
+        if (content == null || content.length() < 1) {
+            request.setAttribute("flash", "Your post was empty.");
+            return "post";
+        }
+        if (content.length() > 140) {
+            request.setAttribute("flash", "There's too much post in yer post! 140 characters max, please.");
+            return "post";
+        }
+        this.getDataService().addPost(content, user);
+        return redirectTag + "timeline";       
+    }
+    
     @SuppressWarnings("unchecked")
     private DataService getDataService() {
         return (DataService)this.getServletContext().getAttribute("dao");
+    }
+
+    private boolean loggedIn(HttpServletRequest request) {
+         return getSessionUser(request) != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private User getSessionUser(HttpServletRequest request) {
+        return (User)request.getSession().getAttribute("user");
     }
 
 }
