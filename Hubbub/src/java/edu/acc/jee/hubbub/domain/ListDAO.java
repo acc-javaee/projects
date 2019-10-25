@@ -1,5 +1,6 @@
 package edu.acc.jee.hubbub.domain;
 
+import edu.acc.jee.hashtool.HashTool;
 import edu.acc.jee.hubbub.UserDTO;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,8 @@ public class ListDAO implements DataService {
             throw new IllegalArgumentException("Bean does not validate");
         if (this.userExists(bean.getUsername()))
             throw new IllegalArgumentException("Username " + bean.getUsername() + " is unavailable");
-        User user = new User(bean.getUsername(), bean.getPassword());
+        String hash = HashTool.hash(bean.getPassword());
+        User user = new User(bean.getUsername(), hash);
         users.add(user);
         return user;
     }
@@ -26,9 +28,9 @@ public class ListDAO implements DataService {
         if (!bean.isValid())
             throw new IllegalArgumentException("Bean does not validate");
         User user = this.findUserByUsername(bean.getUsername());
-        if (user != null && user.getPasshash().equals(bean.getPassword()))
-            return user;
-        else return null;
+        if (user == null) return null;
+        boolean match = HashTool.compare(bean.getPassword(), user.getPasshash());
+        return match ? user : null;
     }
 
     @Override
