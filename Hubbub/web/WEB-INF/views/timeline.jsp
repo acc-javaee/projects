@@ -14,7 +14,8 @@
             <%@include file="/WEB-INF/jspf/masthead.jspf"%>
             <h1>Welcome to Hubbub&trade;, ${user}</h1>
             <div class="w3-container w3-margin">
-                <p>Here's all our Bub&trade;s' Blurb&trade;s.</p>
+                <%@include file="/WEB-INF/jspf/postbox.jspf"%>
+                <h2>Here's all our Bub&trade;s' Blurb&trade;s.</h2>
                 <c:forEach var="post" items="${posts}">
                     <%@include file="/WEB-INF/jspf/guestpost.jspf"%>
                 </c:forEach>
