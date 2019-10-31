@@ -16,7 +16,7 @@
             <div class="w3-container w3-margin">
                 <p>Here's our Bub&trade;s' Blurb&trade;s.</p>
                 <c:forEach var="post" items="${posts}">
-                    <%@include file="/WEB-INF/jspf/guestpost.jspf"%>
+                    <%@include file="/WEB-INF/jspf/post.jspf"%>
                 </c:forEach>
             </div>
         </div>

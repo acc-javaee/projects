@@ -17,7 +17,7 @@
                 <%@include file="/WEB-INF/jspf/postbox.jspf"%>
                 <h2>Here's all our Bub&trade;s' Blurb&trade;s.</h2>
                 <c:forEach var="post" items="${posts}">
-                    <%@include file="/WEB-INF/jspf/guestpost.jspf"%>
+                    <%@include file="/WEB-INF/jspf/post.jspf"%>
                 </c:forEach>
             </div>
         </div>

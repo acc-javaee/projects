@@ -10,6 +10,14 @@
     <div class="w3-container">
         <p>${post.content}</p>
     </div>
+    <c:if test="${not empty user}">
+    <div class="w3-container"><!-- comment area -->
+        <!-- put a textarea hear to add a comment -->
+        <c:forEach var="comment" items="${post.comments}">
+            <p>${comment.author} on ${comment.commented} says: ${comment.comment}</p>
+        </c:forEach>
+    </div>
+    </c:if>
     <footer class="w3-container" style="background-color:#E2DDD2">
         <hr/>
     </footer>

@@ -11,6 +11,7 @@ public class ListDAO implements DataService {
     private List<User> users = new ArrayList<>();
     private List<Post> posts = new ArrayList<>();
     private List<Profile> profiles = new ArrayList<>();
+    private List<Comment> comments = new ArrayList<>();
 
     @Override
     public synchronized User addUser(UserDTO bean) {
@@ -74,5 +75,28 @@ public class ListDAO implements DataService {
                 .skip(offset)
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+    
+    public Comment addComment(User author, Post target, String content) {
+        content = content
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("'", "&apos;")
+                .replace("\"", "&quot;")
+                .replace("%", "&#37;");    
+        Comment comment = new Comment(author, target, content);
+        comment.setId(comment.hashCode());
+        comments.add(comment);
+        target.getComments().add(comment);
+        return comment;
+    }
+    
+    public List<Comment> findCommentsByTargetAndPage(Post target, int offset, int limit) {
+        return target.getComments()
+                .stream()
+                .sorted((a,b) -> b.getCommented().compareTo(a.getCommented()))
+                .skip(offset)
+                .limit(limit)
+                .collect(Collectors.toList());        
     }
 }
