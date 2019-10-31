@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class ListDAO implements DataService {
     private List<User> users = new ArrayList<>();
     private List<Post> posts = new ArrayList<>();
+    private List<Profile> profiles = new ArrayList<>();
 
     @Override
     public synchronized User addUser(UserDTO bean) {
@@ -18,7 +19,10 @@ public class ListDAO implements DataService {
         if (this.userExists(bean.getUsername()))
             throw new IllegalArgumentException("Username " + bean.getUsername() + " is unavailable");
         String hash = HashTool.hash(bean.getPassword());
-        User user = new User(bean.getUsername(), hash);
+        Profile profile = new Profile();
+        profile.setId(profile.hashCode());
+        profiles.add(profile);
+        User user = new User(bean.getUsername(), hash, profile);
         users.add(user);
         return user;
     }

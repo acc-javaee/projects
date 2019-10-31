@@ -1,11 +1,26 @@
 DROP TABLE posts;
 DROP TABLE users;
+DROP TABLE profiles;
+
+CREATE TABLE profiles (
+    firstname VARCHAR(20),
+    lastname VARCHAR(30),
+    email VARCHAR(100),
+    timezone VARCHAR(50),
+    biography VARCHAR(512),
+    avatar BLOB(200K),
+    mime VARCHAR(30),
+    id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY,
+    CONSTRAINT pk_profiles PRIMARY KEY (id)
+);
 
 CREATE TABLE users (
     username VARCHAR(20) NOT NULL,
     passhash CHAR(55) NOT NULL,
     joined   DATE DEFAULT CURRENT_DATE,
-    CONSTRAINT pk_users PRIMARY KEY (username)
+    profile  INTEGER NOT NULL,
+    CONSTRAINT pk_users PRIMARY KEY (username),
+    CONSTRAINT fk_user_profile FOREIGN KEY (profile) REFERENCES profiles(id)
 );
 
 CREATE TABLE posts (
@@ -17,9 +32,16 @@ CREATE TABLE posts (
     CONSTRAINT fk_post_author FOREIGN KEY (author) REFERENCES users(username)
 );
 
-INSERT INTO users (username, passhash) VALUES
-    ('johndoe', '$5$JI3G06zK$S.ZZCjQFhTYEdPfcGenqkK.s8nIr0KW4jXsqDEwBCX8'),
-    ('janedoe', '$5$JI3G06zK$S.ZZCjQFhTYEdPfcGenqkK.s8nIr0KW4jXsqDEwBCX8');
+INSERT INTO profiles (firstname, lastname, email, timezone, biography) VALUES
+    ('John', 'Doe', 'johndoe@morgue.org', NULL, NULL),
+    ('Jane', 'Doe', NULL, NULL, 'I sometimes hang with @johndoe.'),
+    (NULL, NULL, 'jjack@pailowater.net', 'America/Los_Angeles', NULL);
+
+
+INSERT INTO users (username, passhash, profile) VALUES
+    ('johndoe', '$5$JI3G06zK$S.ZZCjQFhTYEdPfcGenqkK.s8nIr0KW4jXsqDEwBCX8', 1),
+    ('janedoe', '$5$JI3G06zK$S.ZZCjQFhTYEdPfcGenqkK.s8nIr0KW4jXsqDEwBCX8', 2),
+    ('jilljack', '$5$JI3G06zK$S.ZZCjQFhTYEdPfcGenqkK.s8nIr0KW4jXsqDEwBCX8', 3);
 
 INSERT INTO posts (author, posted, content) VALUES
     ('johndoe', '2017-05-09 08:23:47.110', 'My first Hubbub post! #JavaRules #J2EERocks'),

@@ -11,21 +11,21 @@ public class User implements Serializable {
     private String username;
     private String passhash;
     private Date   joined;
+    private Profile profile;
     private List<Post> posts = new ArrayList<>();
     
     public User() {
     }
 
-    public User(String username, String passhash) {
-        this.username = username;
-        this.passhash = passhash;
-        this.joined = new Date();
+    public User(String username, String passhash, Profile profile) {
+        this(username, passhash, new Date(), profile);
     }
 
-    public User(String username, String passhash, Date joined) {
+    public User(String username, String passhash, Date joined, Profile profile) {
         this.username = username;
         this.passhash = passhash;
         this.joined = joined;
+        this.profile = profile;
     }
 
     public String getUsername() {
@@ -50,6 +50,14 @@ public class User implements Serializable {
 
     public void setJoined(Date joined) {
         this.joined = joined;
+    }
+    
+    public Profile getProfile() {
+        return profile;
+    }
+    
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
     public List<Post> getPosts() {
