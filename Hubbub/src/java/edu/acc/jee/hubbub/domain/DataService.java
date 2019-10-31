@@ -11,4 +11,7 @@ public interface DataService {
     
     Post addPost(String content, User author);
     List<Post> findPostsByPage(int offset, int limit);
+    
+    Comment addComment(User user, Post target, String content);
+    List<Comment> findCommentsByTargetAndPage(Post target, int offset, int limit);
 }

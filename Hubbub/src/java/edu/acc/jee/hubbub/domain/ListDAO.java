@@ -77,6 +77,7 @@ public class ListDAO implements DataService {
                 .collect(Collectors.toList());
     }
     
+    @Override
     public Comment addComment(User author, Post target, String content) {
         content = content
                 .replace("<", "&lt;")
@@ -91,6 +92,7 @@ public class ListDAO implements DataService {
         return comment;
     }
     
+    @Override
     public List<Comment> findCommentsByTargetAndPage(Post target, int offset, int limit) {
         return target.getComments()
                 .stream()
