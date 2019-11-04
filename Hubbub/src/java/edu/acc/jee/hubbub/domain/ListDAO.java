@@ -66,6 +66,14 @@ public class ListDAO implements DataService {
         posts.add(post);
         return post;
     }
+    
+    @Override
+    public Post findPostById(int id) {
+        for (Post p : posts)
+            if (p.getId() == id)
+                return p;
+        return null;
+    }
 
     @Override
     public List<Post> findPostsByPage(int offset, int limit) {
@@ -92,13 +100,4 @@ public class ListDAO implements DataService {
         return comment;
     }
     
-    @Override
-    public List<Comment> findCommentsByTargetAndPage(Post target, int offset, int limit) {
-        return target.getComments()
-                .stream()
-                .sorted((a,b) -> b.getCommented().compareTo(a.getCommented()))
-                .skip(offset)
-                .limit(limit)
-                .collect(Collectors.toList());        
-    }
 }

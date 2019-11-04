@@ -1,18 +1,15 @@
 <div class="w3-card-4" style="margin-bottom:64px">
     <header class="w3-container w3-light-gray">
             <span class="w3-left-align w3-large">
-                Posted by ${post.author}
+                Comment by ${comment.author}
             </span>
             <span class="w3-right-align w3-large" style="color: #8F3049">
-                ${post.posted}
+                ${comment.commented}
             </span>
     </header>
-    <div class="w3-container">
-        <p>${post.content}</p>
+    <div class="w3-container w3-margin-left">
+        <p>${comment.comment}</p>
     </div>
-    <c:if test="${not empty user}">
-        <p><a href="main?action=comments&post=${post.id}">View Comments</a>
-    </c:if>
     <footer class="w3-container" style="background-color:#E2DDD2">
         <hr/>
     </footer>

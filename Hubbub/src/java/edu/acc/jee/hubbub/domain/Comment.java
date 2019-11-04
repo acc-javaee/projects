@@ -2,8 +2,11 @@ package edu.acc.jee.hubbub.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Comment implements Serializable {
+    private static final AtomicInteger SEQ = new AtomicInteger(1);
+    
     private User author;
     private Post target;
     private String comment;
@@ -17,6 +20,7 @@ public class Comment implements Serializable {
         this.target = target;
         this.comment = comment;
         this.commented = new Date();
+        this.id = SEQ.incrementAndGet();
     }
 
     public User getAuthor() {

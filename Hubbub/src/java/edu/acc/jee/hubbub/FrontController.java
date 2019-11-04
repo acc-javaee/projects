@@ -1,5 +1,6 @@
 package edu.acc.jee.hubbub;
 
+import edu.acc.jee.hubbub.domain.Comment;
 import edu.acc.jee.hubbub.domain.DataService;
 import edu.acc.jee.hubbub.domain.Post;
 import edu.acc.jee.hubbub.domain.User;
@@ -30,6 +31,7 @@ public class FrontController extends HttpServlet {
             case "join": destination = join(request); break;
             case "timeline": destination = timeline(request); break;
             case "post": destination = post(request); break;
+            case "comments": destination = comments(request); break;
         }
         
         String view;
@@ -176,6 +178,24 @@ public class FrontController extends HttpServlet {
         }
         this.getDataService().addPost(content, user);
         return redirectTag + "timeline";       
+    }
+    
+    private String comments(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        int postId = Integer.parseInt(request.getParameter("post"));
+        Post post = getDataService().findPostById(postId);
+        if (post == null) {
+            request.setAttribute("flash", "Blurb&trade; ID not found: " + postId);
+            return "comments";
+        }
+        request.setAttribute("post", post);
+        if (request.getMethod().equalsIgnoreCase("GET")) return "comments";
+        User author = getSessionUser(request);
+        String content = request.getParameter("content");
+        if (content != null || content.length() > 0 && content.length() <= 70)
+            this.getDataService().addComment(author, post, content);
+        else request.setAttribute("flash", "Your comment must have content.");
+        return "comments";
     }
     
     @SuppressWarnings("unchecked")

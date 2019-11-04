@@ -33,18 +33,16 @@ CREATE TABLE posts (
     CONSTRAINT fk_post_author FOREIGN KEY (author) REFERENCES users(username)
 );
 
-/*
-    CREATE TABLE comments (
-        author VARCHAR(20) NOT NULL,
-        target INTEGER NOT NULL,
-        comment VARCHAR(70) NOT NULL,
-        commented TIMESTAMP DEFAULT CURRENT TIMESTAMP,
-        id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY,
-        CONSTRAINT pk_comments PRIMARY KEY (id),
-        CONSTRAINT fk_comment_author FOREIGN KEY (author) REFERENCES users(username),
-        CONSTRAINT fk_comment_target FOREIGN KEY (target) REFERENCES posts(id)
-    );
-*/
+CREATE TABLE comments (
+    author VARCHAR(20) NOT NULL,
+    target INTEGER NOT NULL,
+    comment VARCHAR(70) NOT NULL,
+    commented TIMESTAMP DEFAULT CURRENT TIMESTAMP,
+    id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY,
+    CONSTRAINT pk_comments PRIMARY KEY (id),
+    CONSTRAINT fk_comment_author FOREIGN KEY (author) REFERENCES users(username),
+    CONSTRAINT fk_comment_target FOREIGN KEY (target) REFERENCES posts(id)
+);
 
 INSERT INTO profiles (firstname, lastname, email, timezone, biography) VALUES
     ('John', 'Doe', 'johndoe@morgue.org', NULL, NULL),

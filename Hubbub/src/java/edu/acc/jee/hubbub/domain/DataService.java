@@ -10,8 +10,8 @@ public interface DataService {
     boolean userExists(String username);
     
     Post addPost(String content, User author);
+    Post findPostById(int id);
     List<Post> findPostsByPage(int offset, int limit);
     
     Comment addComment(User user, Post target, String content);
-    List<Comment> findCommentsByTargetAndPage(Post target, int offset, int limit);
 }
