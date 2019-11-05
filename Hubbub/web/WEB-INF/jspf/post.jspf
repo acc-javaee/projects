@@ -1,19 +1,19 @@
-<div class="w3-card-4" style="margin-bottom:64px">
+<div class="w3-card-4" style="margin-bottom:34px">
     <header class="w3-container w3-light-gray">
-            <span class="w3-left-align w3-large">
+            <span>
                 Posted by ${post.author}
             </span>
-            <span class="w3-right-align w3-large" style="color: #8F3049">
+            <span class="w3-right-align hubbubred">
                 ${post.posted}
             </span>
     </header>
     <div class="w3-container">
         <p>${post.content}</p>
     </div>
-    <c:if test="${not empty user}">
-        <p><a href="main?action=comments&post=${post.id}">View Comments</a>
+    <c:if test="${not empty user and empty param.post}">
+    <p class="w3-margin-left"><a href="main?action=comments&post=${post.id}">View Comments</a></p>
     </c:if>
-    <footer class="w3-container" style="background-color:#E2DDD2">
+    <footer class="w3-container hubbubtan">
         <hr/>
     </footer>
 </div>

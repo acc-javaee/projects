@@ -86,6 +86,23 @@ public class ListDAO implements DataService {
     }
     
     @Override
+    public boolean updateProfileFor(User user, Profile changed) {
+        if (!changed.isValid()) return false;
+        user.getProfile().setFirstName(changed.getFirstName());
+        user.getProfile().setLastName(changed.getLastName());
+        user.getProfile().setEmail(changed.getEmail());
+        user.getProfile().setTimeZone(changed.getTimeZone());
+        if (changed.getBiography() != null)
+                user.getProfile().setBiography(changed.getBiography()
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("'", "&apos;")
+                .replace("\"", "&quot;")
+                .replace("%", "&#37;"));
+        return true;  
+    }
+    
+    @Override
     public Comment addComment(User author, Post target, String content) {
         content = content
                 .replace("<", "&lt;")
@@ -94,7 +111,6 @@ public class ListDAO implements DataService {
                 .replace("\"", "&quot;")
                 .replace("%", "&#37;");    
         Comment comment = new Comment(author, target, content);
-        comment.setId(comment.hashCode());
         comments.add(comment);
         target.getComments().add(comment);
         return comment;

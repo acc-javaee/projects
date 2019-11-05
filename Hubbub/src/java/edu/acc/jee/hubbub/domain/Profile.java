@@ -76,6 +76,18 @@ public class Profile implements Serializable {
         this.id = id;
     }
     
+    public boolean isValid() {
+        final String safe = "[^<>'\"%]+";
+        return (
+            (firstName == null || firstName.length() == 0 || firstName.matches(safe))
+                &&
+            (lastName == null || lastName.length() == 0) || lastName.matches(safe))
+                &&
+            (email == null || email.length() == 0 || email.matches(safe + "@" + safe + "\\." +safe))
+                &&
+            (timeZone == null || timeZone.length() == 0 || timeZone.matches("[\\w/]+"));            
+    }
+    
     @Override
     public String toString() {
         return String.format("Profile[id=%d]", id == null ? 0 : id);

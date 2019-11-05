@@ -1,11 +1,14 @@
 package edu.acc.jee.hubbub;
 
-import edu.acc.jee.hubbub.domain.Comment;
 import edu.acc.jee.hubbub.domain.DataService;
 import edu.acc.jee.hubbub.domain.Post;
+import edu.acc.jee.hubbub.domain.Profile;
 import edu.acc.jee.hubbub.domain.User;
 import java.io.IOException;
+import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -32,6 +35,7 @@ public class FrontController extends HttpServlet {
             case "timeline": destination = timeline(request); break;
             case "post": destination = post(request); break;
             case "comments": destination = comments(request); break;
+            case "profile": destination = profile(request); break;
         }
         
         String view;
@@ -198,6 +202,34 @@ public class FrontController extends HttpServlet {
         return "comments";
     }
     
+    private String profile(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        String forName = request.getParameter("for");
+        User target = getDataService().findUserByUsername(forName);
+        request.setAttribute("timeZones", getTimeZones());
+        if (target == null) {
+            request.setAttribute("flash", "No such Bub&trade;: " + forName);
+            return "profile";
+        }
+        if (request.getMethod().equalsIgnoreCase("GET")) {
+            request.setAttribute("target", target);
+            return "profile";
+        }
+        User user = getSessionUser(request);
+        if (!user.equals(target)) return redirectTag + "timeline";
+        Profile temp = new Profile();
+        temp.setFirstName(request.getParameter("firstName"));
+        temp.setLastName(request.getParameter("lastName"));
+        temp.setEmail(request.getParameter("email"));
+        temp.setTimeZone(request.getParameter("timeZone"));
+        temp.setBiography(request.getParameter("biography"));
+        boolean ok = getDataService().updateProfileFor(user, temp);
+        request.setAttribute("target", user);        
+        if (ok) request.setAttribute("success", "Deets&trade; Updated");
+        else request.setAttribute("flash", "Error updating your Deets&trade;.");
+        return "profile";
+    }
+    
     @SuppressWarnings("unchecked")
     private DataService getDataService() {
         return (DataService)this.getServletContext().getAttribute("dao");
@@ -210,6 +242,14 @@ public class FrontController extends HttpServlet {
     @SuppressWarnings("unchecked")
     private User getSessionUser(HttpServletRequest request) {
         return (User)request.getSession().getAttribute("user");
+    }
+    
+    private List<String> getTimeZones() {
+        return ZoneId.SHORT_IDS.values()
+                .stream()
+                .filter((id) -> !id.startsWith("-"))
+                //.sorted()
+                .collect(Collectors.toList());
     }
 
 }
