@@ -83,8 +83,9 @@
                 <hr/>
                 <p>
                     <textarea rows="10" cols="50" name="biography" ${disabled} spellcheck="true"
-                              class="w3-input w3-light-gray">${target.profile.biography}</textarea>
-                    <label>Biography (512 characters max)</label>
+                        class="w3-input w3-light-gray"
+                        onkeyup="charcountupdate(this.value)">${target.profile.biography}</textarea>
+                    <label>Biography (<span id="charcount"></span> left)</label>
                 </p>
                 <c:if test="${empty disabled}">
                     <hr/>
@@ -96,5 +97,12 @@
                 </c:if>
             </form>
     </body>
+    <script type="text/javascript">
+        function charcountupdate(str) {
+            var lng = str.length;
+            document.getElementById("charcount").innerHTML = 512 - lng;
+        }
+        charcountupdate("");
+    </script>    
 </html>
 

@@ -1,7 +1,13 @@
 <div class="w3-card-4" style="margin-bottom:34px">
     <header class="w3-container w3-light-gray">
             <span>
-                Posted by ${post.author}
+                Posted by
+                <c:choose>
+                <c:when test="${not empty user}">
+                    <a href="main?action=profile&for=${post.author}">${post.author}</a>
+                </c:when>
+                <c:otherwise>${post.author}</c:otherwise>
+                </c:choose>
             </span>
             <span class="w3-right-align hubbubred">
                 ${post.posted}

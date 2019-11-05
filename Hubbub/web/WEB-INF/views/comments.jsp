@@ -6,8 +6,9 @@
         <%@include file="/WEB-INF/jspf/w3csshead.jspf"%>
     </head>
     <body>
-        <div class="w3-bar bgblue">
+        <div class="w3-bar hubbubblue">
             <a class="w3-bar-item w3-button" href="main?action=timeline">Home</a>
+            <a class="w3-bar-item w3-button" href="main?action=profile&for=${user}">My Deets&trade;</a>
             <a class="w3-bar-item w3-button" href="main?action=logout">Log Me Out</a>
         </div>
         <div class="w3-container w3-margin-top">

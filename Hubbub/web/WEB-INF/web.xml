@@ -20,6 +20,26 @@
         <param-name>page.size</param-name>
         <param-value>3</param-value>
     </context-param>
+    <context-param>
+        <param-name>db.brand</param-name>
+        <param-value>derby</param-value>
+    </context-param>
+    <context-param>
+        <param-name>db.host</param-name>
+        <param-value>localhost</param-value>
+    </context-param>
+    <context-param>
+        <param-name>db.database</param-name>
+        <param-value>hubbub</param-value>
+    </context-param>
+    <context-param>
+        <param-name>db.user</param-name>
+        <param-value>javauser</param-value>
+    </context-param>
+    <context-param>
+        <param-name>db.pass</param-name>
+        <param-value>javauser</param-value>
+    </context-param>
     <listener>
         <description>ServletContextListener</description>
         <listener-class>edu.acc.jee.hubbub.StartupListener</listener-class>

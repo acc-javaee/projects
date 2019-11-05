@@ -13,7 +13,7 @@ public class StartupListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         DataService dao = new ListDAO();
-        
+        // DataService dao = new DerbyDao(sce.getServletContext());
         User u1 = dao.addUser(new UserDTO("johndoe", "P@ssw0rd"));
         User u2 = dao.addUser(new UserDTO("janedoe", "P@ssw0rd"));
         

@@ -1,4 +1,4 @@
--- DROP TABLE comments;
+DROP TABLE comments;
 DROP TABLE posts;
 DROP TABLE users;
 DROP TABLE profiles;
@@ -59,3 +59,6 @@ INSERT INTO posts (author, posted, content) VALUES
     ('johndoe', '2017-05-09 08:23:47.110', 'My first Hubbub post! #JavaRules #J2EERocks'),
     ('johndoe', '2017-06-02 19:00:05.965', 'I''ve invited Jane to join.'),
     ('janedoe', '2018-01-13 06:30:45.888', 'Alright, I''ve signed up. Now what?');
+
+INSERT INTO comments (author, target, comment) VALUES
+    ('janedoe', 2, 'I''m here, @johndoe!');
