@@ -3,3 +3,15 @@
 .hubbubblue {background-color:#92C4BE;}
 .hubbubtan {background-color:#E2DDD2;}
 .hubbubred {color: #8F3049;}
+#flex-container {
+    width: auto;
+    height: auto;
+    display: -webkit-flex;
+    /* Safari */ -webkit-align-items: center;
+    /* Safari 7.0+ */ align-items: center;
+    -webkit-justify-content: space-between;
+    /* Safari 6.1+ */ display: flex;
+    justify-content: space-between;
+    padding-top: .25em;
+    padding-bottom: .25em;
+}
