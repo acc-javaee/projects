@@ -55,12 +55,7 @@ public class ListDAO implements DataService {
 
     @Override
     public synchronized Post addPost(String content, User author) {
-        content = content
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("'", "&apos;")
-                .replace("\"", "&quot;")
-                .replace("%", "&#37;");
+        content = sanitize(content);
         Post post = new Post(content, author);
         author.getPosts().add(post);
         posts.add(post);
@@ -93,27 +88,26 @@ public class ListDAO implements DataService {
         user.getProfile().setEmail(changed.getEmail());
         user.getProfile().setTimeZone(changed.getTimeZone());
         if (changed.getBiography() != null)
-                user.getProfile().setBiography(changed.getBiography()
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("'", "&apos;")
-                .replace("\"", "&quot;")
-                .replace("%", "&#37;"));
+            user.getProfile().setBiography(sanitize(changed.getBiography()));
         return true;  
     }
     
     @Override
     public Comment addComment(User author, Post target, String content) {
-        content = content
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("'", "&apos;")
-                .replace("\"", "&quot;")
-                .replace("%", "&#37;");    
+        content = sanitize(content);    
         Comment comment = new Comment(author, target, content);
         comments.add(comment);
         target.getComments().add(comment);
         return comment;
+    }
+    
+    private String sanitize(String input) {
+        return input
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("'", "&apos;")
+                .replace("\"", "&quot;")
+                .replace("%", "&#37;");                
     }
     
 }
