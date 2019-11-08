@@ -8,7 +8,7 @@ public class User implements Serializable {
     
     private String username;
     private String passhash;
-    private Date   joined;
+    private Date   joined = new Date();
     private int    profileId;
     
     public User() {

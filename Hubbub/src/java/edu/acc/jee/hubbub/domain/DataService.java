@@ -13,6 +13,7 @@ public interface DataService {
     Post findPostById(int id);
     List<Post> findPostsByPage(int offset, int limit);
     
+    Profile addProfile();
     Profile findProfileById(int id);
     boolean updateProfileFor(User user, Profile changed);
     

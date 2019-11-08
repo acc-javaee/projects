@@ -9,7 +9,7 @@ public class Post implements Serializable {
     
     private String content;
     private String authorName;
-    private Date   posted;
+    private Date   posted = new Date();
     private Integer id = SEQ.incrementAndGet();
 
     public Post() {

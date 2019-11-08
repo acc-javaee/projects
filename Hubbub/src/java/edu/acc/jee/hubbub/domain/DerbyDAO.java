@@ -31,7 +31,7 @@ public class DerbyDAO implements DataService {
         if (this.userExists(bean.getUsername()))
             throw new IllegalArgumentException("Username " + bean.getUsername() + " is unavailable");
         String hash = HashTool.hash(bean.getPassword());
-        final String sql = "INSERT INTO users (username, passhash) VALUES (?,?)";
+        final String sql = "INSERT INTO users (username, passhash, joined, profileId) VALUES (?,?,?,?)";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
@@ -40,6 +40,8 @@ public class DerbyDAO implements DataService {
                 User user = new User(bean.getUsername(), hash, profile.getId());                
                 pstat.setString(1, user.getUsername());
                 pstat.setString(2, user.getPasshash());
+                pstat.setDate(3, new java.sql.Date(user.getJoined().getTime()));
+                pstat.setInt(4, user.getProfileId());
                 pstat.executeUpdate();
                 conn.commit();
                 return user;
@@ -47,6 +49,9 @@ public class DerbyDAO implements DataService {
             catch (SQLException sqle) {
                 conn.rollback();
                 return null;
+            }
+            finally {
+                conn.setAutoCommit(true);
             }
         }
         catch (SQLException sqle) {
@@ -58,6 +63,7 @@ public class DerbyDAO implements DataService {
         final String sql = "INSERT INTO profiles (firstName) VALUES (NULL)";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstat.executeUpdate();
             try (ResultSet rs = pstat.getGeneratedKeys()) {
                 rs.next();
                 Profile profile = new Profile();
@@ -86,16 +92,17 @@ public class DerbyDAO implements DataService {
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql)) {
             pstat.setString(1, username);
-            ResultSet rs = pstat.executeQuery();
-            if (rs.next()) {
-                User user = new User();
-                user.setUsername(username);
-                user.setPasshash(rs.getString("passhash"));
-                user.setJoined(rs.getDate("joined"));
-                user.setProfileId(rs.getInt("profileId"));
-                return user;
+            try (ResultSet rs = pstat.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUsername(username);
+                    user.setPasshash(rs.getString("passhash"));
+                    user.setJoined(rs.getDate("joined"));
+                    user.setProfileId(rs.getInt("profileId"));
+                    return user;
+                }
+                else return null;
             }
-            else return null;
         } catch (SQLException sqle) {
             return null;
         }
@@ -110,11 +117,12 @@ public class DerbyDAO implements DataService {
     public Post addPost(String content, User author) {
         content = sanitize(content);
         Post post = new Post(content, author.getUsername());
-        final String sql = "INSERT INTO posts (authorName, content) VALUES (?,?)";
+        final String sql = "INSERT INTO posts (authorName, content, posted) VALUES (?,?,?)";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstat.setString(1, post.getAuthorName());
             pstat.setString(2, post.getContent());
+            pstat.setDate(3, new java.sql.Date(post.getPosted().getTime()));
             pstat.executeUpdate();
             try (ResultSet rs = pstat.getGeneratedKeys()) {
                 rs.next();
@@ -167,7 +175,9 @@ public class DerbyDAO implements DataService {
                 }
             }
         }
-        catch (SQLException sqle) {}
+        catch (SQLException sqle) {
+            posts.clear();
+        }
         return posts;
     }
 
@@ -196,13 +206,14 @@ public class DerbyDAO implements DataService {
     @Override
     public Comment addComment(User user, Post target, String content) {
         content = sanitize(content);
-        final String sql = "INSERT INTO comments (author,target,comment) VALUES (?,?,?)";
+        final String sql = "INSERT INTO comments (author,target,comment,commented) VALUES (?,?,?,?)";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             Comment comment = new Comment(user.getUsername(), target.getId(), content);
             pstat.setString(1, comment.getAuthorName());
             pstat.setInt(2, comment.getPostId());
             pstat.setString(3, comment.getComment());
+            pstat.setDate(4, new java.sql.Date(comment.getCommented().getTime()));
             pstat.executeUpdate();
             try (ResultSet rs = pstat.getGeneratedKeys()) {
                 rs.next();
