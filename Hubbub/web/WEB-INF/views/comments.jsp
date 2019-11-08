@@ -17,7 +17,7 @@
         </div>
         <div class="w3-card-4">        
         <%@include file="/WEB-INF/jspf/commentbox.jspf"%>
-        <c:forEach var="comment" items="${post.comments}">
+        <c:forEach var="comment" items="${comments}">
         <%@include file="/WEB-INF/jspf/comment.jspf"%>
         </c:forEach>
         </div>

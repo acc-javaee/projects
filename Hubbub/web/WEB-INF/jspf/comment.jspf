@@ -1,7 +1,7 @@
 <div class="w3-card-4" style="margin-bottom:64px">
     <header class="w3-container w3-light-gray">
             <span class="w3-left-align w3-large">
-                Comment by ${comment.author}
+                Comment by ${comment.authorName}
             </span>
             <span class="w3-right-align w3-large" style="color: #8F3049">
                 ${comment.commented}

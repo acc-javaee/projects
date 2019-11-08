@@ -1,32 +1,28 @@
 package edu.acc.jee.hubbub.domain;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Post implements Serializable {
-    private static final AtomicInteger SEQ = new AtomicInteger(1);
+    private static final AtomicInteger SEQ = new AtomicInteger();
     
     private String content;
-    private User   author;
+    private String authorName;
     private Date   posted;
-    private Integer id;
-    private List<Comment> comments = new ArrayList<>();
+    private Integer id = SEQ.incrementAndGet();
 
     public Post() {
     }
 
-    public Post(String content, User author) {
-        this(content, author, new Date());
+    public Post(String content, String authorName) {
+        this(content, authorName, new Date());
     }
 
-    public Post(String content, User author, Date posted) {
+    public Post(String content, String authorName, Date posted) {
         this.content = content;
-        this.author = author;
+        this.authorName = authorName;
         this.posted = posted;
-        this.id = SEQ.incrementAndGet();
     }
 
     public String getContent() {
@@ -37,12 +33,12 @@ public class Post implements Serializable {
         this.content = content;
     }
 
-    public User getAuthor() {
-        return author;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setAuthor(User author) {
-        this.author = author;
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public Date getPosted() {
@@ -51,14 +47,6 @@ public class Post implements Serializable {
 
     public void setPosted(Date posted) {
         this.posted = posted;
-    }
-    
-    public List<Comment> getComments() {
-        return comments;
-    }
-    
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
     }
 
     public Integer getId() {
@@ -72,6 +60,6 @@ public class Post implements Serializable {
     @Override
     public String toString() {
         return "Post[id:" + id + ", content length:" + content.length() + 
-                ", author=" + author + ", posted=" + posted + '}';
+                ", authorName=" + authorName + ", posted=" + posted + '}';
     }
 }

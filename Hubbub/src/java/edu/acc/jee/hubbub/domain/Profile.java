@@ -1,8 +1,11 @@
 package edu.acc.jee.hubbub.domain;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Profile implements Serializable {
+    private static final AtomicInteger SEQ = new AtomicInteger();
+    
     private String firstName;
     private String lastName;
     private String email;
@@ -10,7 +13,7 @@ public class Profile implements Serializable {
     private String biography;
     private byte[] avatar;
     private String mime;
-    private Integer id;
+    private Integer id = SEQ.incrementAndGet();
 
     public String getFirstName() {
         return firstName;

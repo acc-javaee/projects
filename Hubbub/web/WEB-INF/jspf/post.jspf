@@ -37,9 +37,9 @@
                 Posted by
                 <c:choose>
                 <c:when test="${not empty user}">
-                    <a href="main?action=profile&for=${post.author}">${post.author}</a>
+                    <a href="main?action=profile&for=${post.authorName}">${post.authorName}</a>
                 </c:when>
-                <c:otherwise>${post.author}</c:otherwise>
+                <c:otherwise>${post.authorName}</c:otherwise>
                 </c:choose>
             </h4>
         <!-- Remove the first ending </span> tag as well as the second start <span> tag. 

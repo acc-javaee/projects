@@ -21,9 +21,8 @@ public class ListDAO implements DataService {
             throw new IllegalArgumentException("Username " + bean.getUsername() + " is unavailable");
         String hash = HashTool.hash(bean.getPassword());
         Profile profile = new Profile();
-        profile.setId(profile.hashCode());
         profiles.add(profile);
-        User user = new User(bean.getUsername(), hash, profile);
+        User user = new User(bean.getUsername(), hash, profile.getId());
         users.add(user);
         return user;
     }
@@ -56,8 +55,7 @@ public class ListDAO implements DataService {
     @Override
     public synchronized Post addPost(String content, User author) {
         content = sanitize(content);
-        Post post = new Post(content, author);
-        author.getPosts().add(post);
+        Post post = new Post(content, author.getUsername());
         posts.add(post);
         return post;
     }
@@ -73,41 +71,68 @@ public class ListDAO implements DataService {
     @Override
     public List<Post> findPostsByPage(int offset, int limit) {
         return posts
-                .stream()
-                .sorted((a,b) -> b.getPosted().compareTo(a.getPosted()))
-                .skip(offset)
-                .limit(limit)
-                .collect(Collectors.toList());
+            .stream()
+            .sorted((a,b) -> b.getPosted().compareTo(a.getPosted()))
+            .skip(offset)
+            .limit(limit)
+            .collect(Collectors.toList());
     }
     
     @Override
     public boolean updateProfileFor(User user, Profile changed) {
         if (!changed.isValid()) return false;
-        user.getProfile().setFirstName(changed.getFirstName());
-        user.getProfile().setLastName(changed.getLastName());
-        user.getProfile().setEmail(changed.getEmail());
-        user.getProfile().setTimeZone(changed.getTimeZone());
+        Profile profile = findProfileById(user.getProfileId());
+        if (profile == null) return false;
+        profile.setFirstName(changed.getFirstName());
+        profile.setLastName(changed.getLastName());
+        profile.setEmail(changed.getEmail());
+        profile.setTimeZone(changed.getTimeZone());
         if (changed.getBiography() != null)
-            user.getProfile().setBiography(sanitize(changed.getBiography()));
+            profile.setBiography(sanitize(changed.getBiography()));
         return true;  
+    }
+    
+    @Override
+    public Profile findProfileById(int id) {
+        for (Profile profile : profiles)
+            if (profile.getId() == id)
+                return profile;
+        return null;
     }
     
     @Override
     public Comment addComment(User author, Post target, String content) {
         content = sanitize(content);    
-        Comment comment = new Comment(author, target, content);
+        Comment comment = new Comment(author.getUsername(), target.getId(), content);
         comments.add(comment);
-        target.getComments().add(comment);
         return comment;
     }
     
     private String sanitize(String input) {
         return input
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("'", "&apos;")
-                .replace("\"", "&quot;")
-                .replace("%", "&#37;");                
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("'", "&apos;")
+            .replace("\"", "&quot;")
+            .replace("%", "&#37;");                
+    }   
+
+    @Override
+    public Comment findCommentById(int id) {
+        for (Comment comment : comments)
+            if (comment.getId() == id)
+                return comment;
+        return null;
     }
-    
+
+    @Override
+    public List<Comment> findCommentsByPostAndPage(Post target, int offset, int limit) {
+        return comments
+            .stream()
+            .filter((c) -> c.getPostId() == target.getId())
+            .sorted((a,b) -> b.getCommented().compareTo(a.getCommented()))
+            .skip(offset)
+            .limit(limit)
+            .collect(Collectors.toList());
+    }
 }

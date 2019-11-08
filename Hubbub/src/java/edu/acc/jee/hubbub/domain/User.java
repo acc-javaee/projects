@@ -1,9 +1,7 @@
 package edu.acc.jee.hubbub.domain;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class User implements Serializable {
     public static final String USERNAME_PATTERN = "^\\w{6,20}$";
@@ -11,21 +9,20 @@ public class User implements Serializable {
     private String username;
     private String passhash;
     private Date   joined;
-    private Profile profile;
-    private List<Post> posts = new ArrayList<>();
+    private int    profileId;
     
     public User() {
     }
 
-    public User(String username, String passhash, Profile profile) {
-        this(username, passhash, new Date(), profile);
+    public User(String username, String passhash, int profileId) {
+        this(username, passhash, new Date(), profileId);
     }
 
-    public User(String username, String passhash, Date joined, Profile profile) {
+    public User(String username, String passhash, Date joined, int profileId) {
         this.username = username;
         this.passhash = passhash;
         this.joined = joined;
-        this.profile = profile;
+        this.profileId = profileId;
     }
 
     public String getUsername() {
@@ -51,23 +48,15 @@ public class User implements Serializable {
     public void setJoined(Date joined) {
         this.joined = joined;
     }
+
+    public int getProfileId() {
+        return profileId;
+    }
+
+    public void setProfileId(int profileId) {
+        this.profileId = profileId;
+    }
     
-    public Profile getProfile() {
-        return profile;
-    }
-    
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
-
-    public List<Post> getPosts() {
-        return posts;
-    }
-
-    public void setPosts(List<Post> posts) {
-        this.posts = posts;
-    }
-
     @Override
     public String toString() {
         return username;

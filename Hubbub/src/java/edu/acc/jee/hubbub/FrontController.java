@@ -1,5 +1,6 @@
 package edu.acc.jee.hubbub;
 
+import edu.acc.jee.hubbub.domain.Comment;
 import edu.acc.jee.hubbub.domain.DataService;
 import edu.acc.jee.hubbub.domain.Post;
 import edu.acc.jee.hubbub.domain.Profile;
@@ -7,7 +8,6 @@ import edu.acc.jee.hubbub.domain.User;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -193,11 +193,18 @@ public class FrontController extends HttpServlet {
             return "comments";
         }
         request.setAttribute("post", post);
-        if (request.getMethod().equalsIgnoreCase("GET")) return "comments";
+        if (request.getMethod().equalsIgnoreCase("GET")) {
+            List<Comment> comments = getDataService().findCommentsByPostAndPage(post, 0, pageSize);
+            request.setAttribute("comments", comments);            
+            return "comments";
+        }
         User author = getSessionUser(request);
         String content = request.getParameter("content");
-        if (content != null || content.length() > 0 && content.length() <= 70)
+        if (content != null || content.length() > 0 && content.length() <= 70) {
             this.getDataService().addComment(author, post, content);
+            List<Comment> comments = getDataService().findCommentsByPostAndPage(post, 0, pageSize);
+            request.setAttribute("comments", comments);
+        }
         else request.setAttribute("flash", "Your comment must have content.");
         return "comments";
     }
@@ -213,6 +220,8 @@ public class FrontController extends HttpServlet {
         }
         if (request.getMethod().equalsIgnoreCase("GET")) {
             request.setAttribute("target", target);
+            Profile profile = getDataService().findProfileById(target.getProfileId());
+            request.setAttribute("profile", profile);
             return "profile";
         }
         User user = getSessionUser(request);
@@ -225,7 +234,11 @@ public class FrontController extends HttpServlet {
         temp.setBiography(request.getParameter("biography"));
         boolean ok = getDataService().updateProfileFor(user, temp);
         request.setAttribute("target", user);        
-        if (ok) request.setAttribute("success", "Deets&trade; Updated");
+        if (ok) {
+            request.setAttribute("success", "Deets&trade; Updated");
+            Profile profile = getDataService().findProfileById(user.getProfileId());
+            request.setAttribute("profile", profile);
+        }
         else request.setAttribute("flash", "Error updating your Deets&trade;.");
         return "profile";
     }
