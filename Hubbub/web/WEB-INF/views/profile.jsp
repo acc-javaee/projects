@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Hubbub&trade; &raquo; Deets&trade; &raquo; ${target.username}</title>
+        <title>Hubbub&trade; &raquo; Deets&trade; &raquo; ${target}</title>
         <%@include file="/WEB-INF/jspf/w3csshead.jspf"%>
         <style type="text/css">.success {color:#92C4BE;}</style>
     </head>
@@ -18,7 +18,8 @@
         </div>
         <div class="w3-container">
             <h1>
-                Hubbub&trade; Deets&trade; for <span class="hubbubred">${target}</span>
+                <c:set var="owner" value="${target eq user ? 'Me' : target}"/>
+                Hubbub&trade; Deets&trade; for <a href="main?action=wall&for=${target}" class="hubbubred">${owner}</a>
                 (Bub&trade; since <f:formatDate type="date" value="${target.joined}"/>)
             </h1>
         </div>

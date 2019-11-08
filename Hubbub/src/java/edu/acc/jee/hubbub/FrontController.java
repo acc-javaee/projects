@@ -36,6 +36,7 @@ public class FrontController extends HttpServlet {
             case "post": destination = post(request); break;
             case "comments": destination = comments(request); break;
             case "profile": destination = profile(request); break;
+            case "wall": destination = wall(request); break;
         }
         
         String view;
@@ -241,6 +242,14 @@ public class FrontController extends HttpServlet {
         }
         else request.setAttribute("flash", "Error updating your Deets&trade;.");
         return "profile";
+    }
+    // /main?action=wall&for=username
+    private String wall(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        String target = request.getParameter("for");
+        List<Post> posts = getDataService().findPostsByAuthorAndPage(target, 0, pageSize);
+        request.setAttribute("posts", posts);
+        return "wall";
     }
     
     @SuppressWarnings("unchecked")

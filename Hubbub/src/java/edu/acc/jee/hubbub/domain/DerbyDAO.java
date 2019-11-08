@@ -31,7 +31,7 @@ public class DerbyDAO implements DataService {
         if (this.userExists(bean.getUsername()))
             throw new IllegalArgumentException("Username " + bean.getUsername() + " is unavailable");
         String hash = HashTool.hash(bean.getPassword());
-        final String sql = "INSERT INTO users (username, passhash, joined, profileId) VALUES (?,?,?,?)";
+        final String sql = "INSERT INTO users (username, passhash, joined, profile) VALUES (?,?,?,?)";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql)) {
             conn.setAutoCommit(false);
@@ -98,7 +98,7 @@ public class DerbyDAO implements DataService {
                     user.setUsername(username);
                     user.setPasshash(rs.getString("passhash"));
                     user.setJoined(rs.getDate("joined"));
-                    user.setProfileId(rs.getInt("profileId"));
+                    user.setProfileId(rs.getInt("profile"));
                     return user;
                 }
                 else return null;
@@ -117,7 +117,7 @@ public class DerbyDAO implements DataService {
     public Post addPost(String content, User author) {
         content = sanitize(content);
         Post post = new Post(content, author.getUsername());
-        final String sql = "INSERT INTO posts (authorName, content, posted) VALUES (?,?,?)";
+        final String sql = "INSERT INTO posts (author, content, posted) VALUES (?,?,?)";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstat.setString(1, post.getAuthorName());
@@ -144,7 +144,7 @@ public class DerbyDAO implements DataService {
             try (ResultSet rs = pstat.executeQuery()) {
                 rs.next();
                 Post post = new Post();
-                post.setAuthorName(rs.getString("authorName"));
+                post.setAuthorName(rs.getString("author"));
                 post.setPosted(rs.getTimestamp("posted"));
                 post.setContent(rs.getString("content"));
                 post.setId(rs.getInt("id"));
@@ -167,7 +167,7 @@ public class DerbyDAO implements DataService {
             try (ResultSet rs = pstat.executeQuery()) {
                 while (rs.next()) {
                     Post post = new Post();
-                    post.setAuthorName(rs.getString("authorName"));
+                    post.setAuthorName(rs.getString("author"));
                     post.setPosted(rs.getTimestamp("posted"));
                     post.setContent(rs.getString("content"));
                     post.setId(rs.getInt("id"));
@@ -268,7 +268,7 @@ public class DerbyDAO implements DataService {
             try (ResultSet rs = pstat.executeQuery()) {
                 rs.next();
                 Comment comment = new Comment();
-                comment.setAuthorName(rs.getString("authorName"));
+                comment.setAuthorName(rs.getString("author"));
                 comment.setComment(rs.getString("comment"));
                 comment.setCommented(rs.getTimestamp("commented"));
                 comment.setId(rs.getInt("id"));
@@ -283,7 +283,7 @@ public class DerbyDAO implements DataService {
     @Override
     public List<Comment> findCommentsByPostAndPage(Post target, int offset, int limit) {
         List<Comment> comments = new ArrayList<>();
-        final String sql = "SELECT * FROM comments WHERE postId = ? ORDER BY commented OFFSET ? FETCH NEXT ? ROWS ONLY";
+        final String sql = "SELECT * FROM comments WHERE target = ? ORDER BY commented OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         try (Connection conn = ds.getConnection();
              PreparedStatement pstat = conn.prepareStatement(sql)) {
             pstat.setInt(1, target.getId());
@@ -292,9 +292,10 @@ public class DerbyDAO implements DataService {
             try (ResultSet rs = pstat.executeQuery()) {
                 while (rs.next()) {
                     Comment comment = new Comment();
-                    comment.setAuthorName(rs.getString("authorName"));
+                    comment.setAuthorName(rs.getString("author"));
                     comment.setComment(rs.getString("comment"));
                     comment.setCommented(rs.getTimestamp("commented"));
+                    comment.setPostId(rs.getInt("target"));
                     comment.setId(rs.getInt("id"));
                     comments.add(comment);
                 }
@@ -303,4 +304,31 @@ public class DerbyDAO implements DataService {
         catch (SQLException sqle) {}
         return comments;
     }
+
+    @Override
+    public List<Post> findPostsByAuthorAndPage(String authorName, int offset, int limit) {
+        List<Post> posts = new ArrayList<>();
+        final String sql = "SELECT * FROM posts WHERE author= ? ORDER BY posted DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, authorName);
+            pstat.setInt(2, offset);
+            pstat.setInt(3, limit);
+            try (ResultSet rs = pstat.executeQuery()) {
+                while (rs.next()) {
+                    Post post = new Post();
+                    post.setAuthorName(authorName);
+                    post.setContent(rs.getString("content"));
+                    post.setPosted(rs.getDate("posted"));
+                    post.setId(rs.getInt("id"));
+                    posts.add(post);
+                }
+            }
+        }
+        catch (SQLException sqle) {
+            posts.clear();
+        }
+        return posts;
+    }
+
 }

@@ -37,7 +37,7 @@
                 Posted by
                 <c:choose>
                 <c:when test="${not empty user}">
-                    <a href="main?action=profile&for=${post.authorName}">${post.authorName}</a>
+                    <a href="main?action=wall&for=${post.authorName}">${post.authorName}</a>
                 </c:when>
                 <c:otherwise>${post.authorName}</c:otherwise>
                 </c:choose>
@@ -52,7 +52,7 @@
         <!-- Wrap the ${post.posted} line in a tag (I recommend using the <p> or <small> tag) and 
         use the class="hubbubred" in the tag. -->
             <p class="hubbubred">
-                ${post.posted}
+                <f:formatDate type="both" value="${post.posted}"/>
             </p>
         </span>
     </header>

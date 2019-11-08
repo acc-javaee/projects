@@ -141,4 +141,15 @@ public class ListDAO implements DataService {
             .limit(limit)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public List<Post> findPostsByAuthorAndPage(String authorName, int offset, int limit) {
+        return posts
+            .stream()
+            .filter(p -> p.getAuthorName().equals(authorName))
+            .sorted((a,b) -> b.getPosted().compareTo(a.getPosted()))
+            .skip(offset)
+            .limit(limit)
+            .collect(Collectors.toList());
+    }
 }

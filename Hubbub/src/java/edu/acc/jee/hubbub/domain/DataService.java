@@ -12,6 +12,7 @@ public interface DataService {
     Post addPost(String content, User author);
     Post findPostById(int id);
     List<Post> findPostsByPage(int offset, int limit);
+    List<Post> findPostsByAuthorAndPage(String authorName, int offset, int limit);
     
     Profile addProfile();
     Profile findProfileById(int id);
