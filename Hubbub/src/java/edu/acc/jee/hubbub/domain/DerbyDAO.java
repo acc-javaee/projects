@@ -2,6 +2,9 @@ package edu.acc.jee.hubbub.domain;
 
 import edu.acc.jee.hashtool.HashTool;
 import edu.acc.jee.hubbub.UserDTO;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -329,6 +332,112 @@ public class DerbyDAO implements DataService {
             posts.clear();
         }
         return posts;
+    }
+
+    @Override
+    public boolean updateAvatarFor(User user, String mime, InputStream is) {
+        final String sql = "UPDATE profiles SET avatar = ?, mime = ? WHERE id = ?";
+        byte[] imageData = null;
+        try {
+            imageData = bytesFromStream(is);
+        }
+        catch (IOException ioe) {
+            return false;
+        }
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setBytes(1, imageData);
+            pstat.setString(2, mime);
+            pstat.setInt(3, user.getProfileId());
+            pstat.executeUpdate();
+            return true;
+        }
+        catch (SQLException sqle) {
+            return false;
+        }
+    }
+    
+    private byte[] bytesFromStream(InputStream is) throws IOException {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[0xFFFF];
+            for (int len; (len = is.read(buffer)) != -1; )
+                os.write(buffer, 0, len);
+            os.flush();
+            return os.toByteArray();
+        }
+    }
+
+    @Override
+    public boolean revertAvatarFor(User user) {
+            final String sql = "UPDATE profiles SET mime = NULL, avatar = NULL WHERE id = ?";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setInt(1, user.getProfileId());
+            pstat.executeUpdate();
+            return true;
+        }
+        catch (SQLException sqle) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean follow(User follower, User followee) {
+        return updateFollowing(follower, followee, true);
+    }
+
+    @Override
+    public boolean unfollow(User follower, User followee) {
+        return updateFollowing(follower, followee, false);
+    }
+    
+    private boolean updateFollowing(User follower, User followee, boolean save) {
+        final String sql = save 
+                ? "INSERT INTO following VALUES (?,?)"
+                : "DELETE FROM following WHERE follower = ? AND followee = ? ";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, follower.getUsername());
+            pstat.setString(2, followee.getUsername());
+            pstat.executeUpdate();
+            return true;
+        }
+        catch (SQLException sqle) {
+            return false;
+        }        
+    }
+
+    @Override
+    public List<User> findFolloweesByUser(User user) {
+        return findFromFollowing(user, true);
+    }
+
+    @Override
+    public List<User> findFollowersByUser(User user) {
+        return findFromFollowing(user, false);
+    }
+
+    private List<User> findFromFollowing(User user, boolean direction) {
+        final String sql = direction
+                ? "SELECT * FROM following WHERE follower = ?"
+                : "SELECT * FROM following WHERE followee = ?";
+        List<User> list = new ArrayList<>();
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, user.getUsername());
+            try (ResultSet rs = pstat.executeQuery()) {
+                while (rs.next()) {
+                    User other = direction 
+                            ? findUserByUsername(rs.getString("followee"))
+                            : findUserByUsername(rs.getString("follower"));
+                    list.add(other);
+                }
+            }
+        }
+        catch (SQLException sqle) {}
+        finally {
+            return list;
+        }
     }
 
 }

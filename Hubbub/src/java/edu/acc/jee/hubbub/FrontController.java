@@ -1,4 +1,4 @@
-package edu.acc.jee.hubbub;
+    package edu.acc.jee.hubbub;
 
 import edu.acc.jee.hubbub.domain.Comment;
 import edu.acc.jee.hubbub.domain.DataService;
@@ -6,6 +6,7 @@ import edu.acc.jee.hubbub.domain.Post;
 import edu.acc.jee.hubbub.domain.Profile;
 import edu.acc.jee.hubbub.domain.User;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 public class FrontController extends HttpServlet {
     private String actionDefault;
@@ -37,6 +39,10 @@ public class FrontController extends HttpServlet {
             case "comments": destination = comments(request); break;
             case "profile": destination = profile(request); break;
             case "wall": destination = wall(request); break;
+            case "avatar": destination = avatar(request); break;
+            case "revert": destination = revert(request); break;
+            case "follow": destination = follow(request); break;
+            case "unfollow":destination = unfollow(request); break;
         }
         
         String view;
@@ -223,10 +229,14 @@ public class FrontController extends HttpServlet {
             request.setAttribute("target", target);
             Profile profile = getDataService().findProfileById(target.getProfileId());
             request.setAttribute("profile", profile);
+            List<User> followees = getDataService().findFolloweesByUser(target);
+            request.setAttribute("followees", followees);
+            List<User> followers = getDataService().findFollowersByUser(target);
+            request.setAttribute("followers", followers);
             return "profile";
         }
         User user = getSessionUser(request);
-        if (!user.equals(target)) return redirectTag + "timeline";
+        if (!user.getUsername().equals(target.getUsername())) return redirectTag + "timeline";
         Profile temp = new Profile();
         temp.setFirstName(request.getParameter("firstName"));
         temp.setLastName(request.getParameter("lastName"));
@@ -250,6 +260,54 @@ public class FrontController extends HttpServlet {
         List<Post> posts = getDataService().findPostsByAuthorAndPage(target, 0, pageSize);
         request.setAttribute("posts", posts);
         return "wall";
+    }
+    
+    // /main?action=avatar
+    private String avatar(HttpServletRequest request)
+    throws ServletException, IOException {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        if (request.getMethod().equalsIgnoreCase("GET")) return "upload";
+        final Part filePart = request.getPart("avatar");
+        String fileName = filePart.getSubmittedFileName();
+        String fileType = filePart.getContentType();
+        // image/png
+        if (!fileType.contains("image")) {
+            String message = String.format(
+                "The uploaded file (%s) was not an image.", fileName);
+            request.setAttribute("flash", message);
+            return "upload";
+        }
+        InputStream data = filePart.getInputStream();
+        getDataService().updateAvatarFor(getSessionUser(request), fileType, data);
+        return redirectTag + "profile&for=" + getSessionUser(request);
+    }
+    
+    private String revert(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        User user = getSessionUser(request);
+        int profileId = user.getProfileId();
+        getDataService().revertAvatarFor(user);
+        return redirectTag + "profilef&or=" + user;
+    }
+    
+    private String follow(HttpServletRequest request) {
+        return toggleFollow(request, true);
+    }
+    
+    private String unfollow(HttpServletRequest request) {
+        return toggleFollow(request, false);
+    }
+    
+    private String toggleFollow(HttpServletRequest request, boolean direction) {
+        if (!loggedIn(request)) return redirectTag + "guest";        
+        String targetName = request.getParameter("target");
+        User follower = getSessionUser(request);
+        User followee = getDataService().findUserByUsername(targetName);
+        if (direction)
+            getDataService().follow(follower, followee);
+        else
+            getDataService().unfollow(follower, followee);
+        return redirectTag + "profile&for=" + targetName;        
     }
     
     @SuppressWarnings("unchecked")

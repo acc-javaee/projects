@@ -1,6 +1,7 @@
 package edu.acc.jee.hubbub.domain;
 
 import edu.acc.jee.hubbub.UserDTO;
+import java.io.InputStream;
 import java.util.List;
 
 public interface DataService {
@@ -21,4 +22,12 @@ public interface DataService {
     Comment addComment(User user, Post target, String content);
     Comment findCommentById(int id);
     List<Comment> findCommentsByPostAndPage(Post target, int offset, int limit);
+    
+    boolean updateAvatarFor(User user, String mime, InputStream is);
+    boolean revertAvatarFor(User user);
+    
+    boolean follow(User follower, User followee);
+    boolean unfollow(User follower, User followee);
+    List<User> findFolloweesByUser(User user);
+    List<User> findFollowersByUser(User user);
 }

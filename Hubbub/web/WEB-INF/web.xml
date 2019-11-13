@@ -47,10 +47,21 @@
     <servlet>
         <servlet-name>FrontController</servlet-name>
         <servlet-class>edu.acc.jee.hubbub.FrontController</servlet-class>
+        <multipart-config>
+            <max-file-size>200000</max-file-size>
+        </multipart-config>
+    </servlet>
+    <servlet>
+        <servlet-name>AvatarController</servlet-name>
+        <servlet-class>edu.acc.jee.hubbub.AvatarController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>FrontController</servlet-name>
         <url-pattern>/main</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AvatarController</servlet-name>
+        <url-pattern>/avatar</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

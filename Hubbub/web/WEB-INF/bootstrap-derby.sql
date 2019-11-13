@@ -1,3 +1,4 @@
+DROP TABLE following;
 DROP TABLE comments;
 DROP TABLE posts;
 DROP TABLE users;
@@ -44,6 +45,14 @@ CREATE TABLE comments (
     CONSTRAINT fk_comment_target FOREIGN KEY (target) REFERENCES posts(id)
 );
 
+CREATE TABLE following (
+    follower VARCHAR(20) NOT NULL,
+    followee VARCHAR(20) NOT NULL,
+    CONSTRAINT pk_following PRIMARY KEY (follower,followee),
+    CONSTRAINT fk_follower_user FOREIGN KEY (follower) REFERENCES users(username),
+    CONSTRAINT fk_followee_user FOREIGN KEY (followee) REFERENCES users(username)
+);
+
 INSERT INTO profiles (firstname, lastname, email, timezone, biography) VALUES
     ('John', 'Doe', 'johndoe@morgue.org', NULL, NULL),
     ('Jane', 'Doe', NULL, NULL, 'I sometimes hang with @johndoe.'),
@@ -62,3 +71,8 @@ INSERT INTO posts (author, posted, content) VALUES
 
 INSERT INTO comments (author, target, comment) VALUES
     ('janedoe', 2, 'I''m here, @johndoe!');
+
+INSERT INTO following VALUES
+    ('johndoe', 'janedoe'),
+    ('janedoe', 'johndoe'),
+    ('janedoe', 'jilljack');

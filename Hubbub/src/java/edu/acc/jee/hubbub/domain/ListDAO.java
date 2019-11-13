@@ -2,6 +2,7 @@ package edu.acc.jee.hubbub.domain;
 
 import edu.acc.jee.hashtool.HashTool;
 import edu.acc.jee.hubbub.UserDTO;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -151,5 +152,35 @@ public class ListDAO implements DataService {
             .skip(offset)
             .limit(limit)
             .collect(Collectors.toList());
+    }
+    
+    @Override
+    public boolean updateAvatarFor(User user, String mime, InputStream is) {
+        return false;
+    }
+
+    @Override
+    public boolean revertAvatarFor(User user) {
+        return false;
+    }
+
+    @Override
+    public boolean follow(User follower, User followee) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean unfollow(User follower, User followee) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<User> findFolloweesByUser(User user) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<User> findFollowersByUser(User user) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

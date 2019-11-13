@@ -34,6 +34,7 @@
         <div> tags all work, but I think the p and the h tags have the best presentation.) 
         Doing this will keep the content together. -->
             <h4>
+                <img src="avatar?for=${post.authorName}" width="80"/>
                 Posted by
                 <c:choose>
                 <c:when test="${not empty user}">
