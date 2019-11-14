@@ -489,4 +489,107 @@ public class DerbyDAO implements DataService {
         }
     }
 
+    @Override
+    public List<Post> findPostsByTag(Tag tag) {
+        List<Post> list = new ArrayList<>();
+        final String sql = "SELECT posts.author, posts.content, posts.posted, posts.id FROM " +
+                "posts INNER JOIN post_tags ON posts.id = post_tags.post WHERE " +
+                "post_tags.tag = ? ORDER BY posts.posted DESC";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, tag.getTagName());
+            try (ResultSet rs = pstat.executeQuery()) {
+                while (rs.next()) {
+                    Post post = new Post();
+                    post.setAuthorName(rs.getString("author"));
+                    post.setContent(rs.getString("content"));
+                    post.setPosted(rs.getDate("posted"));
+                    post.setId(rs.getInt("id"));
+                    list.add(post);
+                }
+            }
+        }
+        catch (SQLException sqle) {}
+        finally {
+            return list;
+        }
+    }
+    
+    @Override
+    public Tag findTagByTagName(String tagName) {
+        final String sql = "SELECT * FROM tags WHERE tagname = ?";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, tagName);
+            try (ResultSet rs = pstat.executeQuery()) {
+                rs.next();
+                Tag tag = new Tag();
+                tag.setTagName(tagName);
+                tag.setCreator(rs.getString("creator"));
+                tag.setCreated(rs.getDate("created"));
+                return tag;
+            }
+        }
+        catch (SQLException sqle) {
+            return null;
+        }
+    }
+
+    @Override
+    public Tag addTag(User creator, String tagName) {
+        final String sql = "INSERT INTO tags (tagname, creator) VALUES (?,?)";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, tagName);
+            pstat.setString(2, creator.getUsername());
+            pstat.executeUpdate();
+            return findTagByTagName(tagName);
+        }
+        catch (SQLException sqle) {
+            return null;
+        }
+    }
+    
+    @Override
+    public boolean tagPost(String tagName, Post post) {
+        Tag tag = findTagByTagName(tagName);
+        if (tag == null) {
+            User author = findUserByUsername(post.getAuthorName());
+            tag = addTag(author, tagName);
+            if (tag == null) return false;
+        }
+        final String sql = "INSERT INTO post_tags (tag,post) VALUES (?,?)";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, tagName);
+            pstat.setInt(2, post.getId());
+            pstat.executeUpdate();
+            return true;
+        }
+        catch (SQLException sqle) {
+            return false;
+        }
+    }
+
+    @Override
+    public List<Tag> findTagsByCreator(User creator) {
+        List<Tag> list = new ArrayList<>();
+        final String sql = "SELECT * FROM tags WHERE creator = ? ORDER BY tagname ASC";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, creator.getUsername());
+            try (ResultSet rs = pstat.executeQuery()) {
+                while (rs.next()) {
+                    Tag tag = new Tag();
+                    tag.setTagName(rs.getString("tagname"));
+                    tag.setCreator(creator.getUsername());
+                    tag.setCreated(rs.getDate("created"));
+                    list.add(tag);
+                }
+            }
+        }
+        catch (SQLException sqle){}
+        finally { return list; }
+    }
+
 }

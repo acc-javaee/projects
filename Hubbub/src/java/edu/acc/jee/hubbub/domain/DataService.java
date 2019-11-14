@@ -33,4 +33,10 @@ public interface DataService {
     
     List<Post> findPostsByMentionOf(User subject);
     Mention addMention(User subject, Post post);
+    
+    List<Post> findPostsByTag(Tag tag);
+    Tag findTagByTagName(String tagName);
+    Tag addTag(User creator, String tagName);
+    boolean tagPost(String tagName, Post post);
+    List<Tag> findTagsByCreator(User creator);
 }

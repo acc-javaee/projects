@@ -110,28 +110,43 @@
             </p>
             </c:if>
         </form>
-        <h3>Followees:</h3>
-        <ul class="w3-ul">
-        <c:forEach var="followee" items="${followees}">
-            <li class="w3-bar">
-                <img src="avatar?for=${followee}" class="w3-bar-item w3-circle" style="width:80px">
-                <div class="w3-bar-item">
-                    <span class="w3-large"><a href="main?action=wall&for=${followee}">${followee}</a></span><br>
-                </div>
-            </li>
-        </c:forEach>
-        </ul>
-        <h3>Followers:</h3>
-        <ul class="w3-ul">
-        <c:forEach var="follower" items="${followers}">
-            <li class="w3-bar">
-                <img src="avatar?for=${follower}" class="w3-bar-item w3-circle" style="width:80px">
-                <div class="w3-bar-item">
-                    <span class="w3-large"><a href="main?action=wall&for=${follower}">${follower}</a></span><br>
-                </div>
-            </li>
-        </c:forEach>
-        </ul>        
+        <div class="w3-container w3-card-4 w3-margin">
+            <h3>Followees of ${target}:</h3>
+            <ul class="w3-ul">
+            <c:forEach var="followee" items="${followees}">
+                <li class="w3-bar">
+                    <img src="avatar?for=${followee}" class="w3-bar-item w3-circle" style="width:80px">
+                    <div class="w3-bar-item">
+                        <span class="w3-large"><a href="main?action=wall&for=${followee}">${followee}</a></span><br>
+                    </div>
+                </li>
+            </c:forEach>
+            </ul>
+        </div>
+        <div class="w3-container w3-card-4 w3-margin">     
+            <h3>Followers of ${target}:</h3>
+            <ul class="w3-ul">
+            <c:forEach var="follower" items="${followers}">
+                <li class="w3-bar">
+                    <img src="avatar?for=${follower}" class="w3-bar-item w3-circle" style="width:80px">
+                    <div class="w3-bar-item">
+                        <span class="w3-large"><a href="main?action=wall&for=${follower}">${follower}</a></span><br>
+                    </div>
+                </li>
+            </c:forEach>
+            </ul>  
+        </div>
+        <div class="w3-container w3-card-4 w3-margin">
+            <h3>Tags Created by ${target}</h3>
+            <ul class="w3-ul">
+            <c:forEach var="tag" items="${tags}">
+                <li>
+                    <img src="images/hashtag.png" width="40"/>
+                    <a href="main?action=tags&tagName=${tag.tagName}">${tag.tagName}</a>
+                </li>
+            </c:forEach>
+            </ul>
+        </div>
     </body>
     <script type="text/javascript">
         function charcountupdate(str) {

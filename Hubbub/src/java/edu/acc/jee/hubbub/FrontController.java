@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import static edu.acc.jee.hubbub.ContentDecorator.decorate;
+import edu.acc.jee.hubbub.domain.Tag;
 import java.util.Set;
 
 public class FrontController extends HttpServlet {
@@ -45,7 +46,8 @@ public class FrontController extends HttpServlet {
             case "revert": destination = revert(request); break;
             case "follow": destination = follow(request); break;
             case "unfollow": destination = unfollow(request); break;
-            case "mentions": destination = mention(request); break;
+            case "mentions": destination = mentions(request); break;
+            case "tags": destination = tags(request); break;
         }
         
         String view;
@@ -199,6 +201,9 @@ public class FrontController extends HttpServlet {
             if (subject != null)
                 this.getDataService().addMention(subject, post);
         }
+        Set<String> tags = TagFinder.parse(post.getContent());
+        for (String t : tags)
+            getDataService().tagPost(t, post);
         return redirectTag + "timeline";       
     }
     
@@ -248,6 +253,8 @@ public class FrontController extends HttpServlet {
             request.setAttribute("followees", followees);
             List<User> followers = getDataService().findFollowersByUser(target);
             request.setAttribute("followers", followers);
+            List<Tag> tags = getDataService().findTagsByCreator(target);
+            request.setAttribute("tags", tags);
             return "profile";
         }
         User user = getSessionUser(request);
@@ -327,7 +334,7 @@ public class FrontController extends HttpServlet {
         return redirectTag + "profile&for=" + targetName;        
     }
     
-    private String mention(HttpServletRequest request) {
+    private String mentions(HttpServletRequest request) {
         if (!loggedIn(request)) return redirectTag + "guest";
         String subjectName = request.getParameter("subject");
         User subject = getDataService().findUserByUsername(subjectName);
@@ -336,6 +343,18 @@ public class FrontController extends HttpServlet {
         for (Post p : posts) p.setContent(decorate(p.getContent()));
         request.setAttribute("posts", posts);
         return "mentions";
+    }
+    
+    private String tags(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        String tagName = request.getParameter("tagName");
+        Tag tag = getDataService().findTagByTagName(tagName);
+        if (tag == null) return redirectTag + "timeline";
+        List<Post> posts = getDataService().findPostsByTag(tag);
+        for (Post p : posts) p.setContent(decorate(p.getContent()));
+        request.setAttribute("posts", posts);
+        request.setAttribute("tag", tag);
+        return "tags";
     }
     
     @SuppressWarnings("unchecked")

@@ -1,3 +1,5 @@
+DROP TABLE post_tags;
+DROP TABLE tags;
 DROP TABLE mentions;
 DROP TABLE following;
 DROP TABLE comments;
@@ -63,6 +65,24 @@ CREATE TABLE mentions (
     CONSTRAINT fk_mention_subject FOREIGN KEY (subject) REFERENCES users(username)
 );
 
+CREATE TABLE tags (
+    tagname VARCHAR(30) NOT NULL,
+    creator VARCHAR(20) NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT TIMESTAMP,
+    CONSTRAINT pk_tags PRIMARY KEY (tagname),
+    CONSTRAINT fk_creator_user FOREIGN KEY (creator) REFERENCES users(username)
+);
+
+/* LINK TABLE FOR MANY-TO-MANY Post/Tag RELATIONSHIP */
+CREATE TABLE post_tags (
+    post INTEGER NOT NULL,
+    tag  VARCHAR(30) NOT NULL,
+    id  INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY,
+    CONSTRAINT pk_post_tags PRIMARY KEY (id),
+    CONSTRAINT fk_tag_tagname FOREIGN KEY (tag) REFERENCES tags(tagname),
+    CONSTRAINT fk_tag_post FOREIGN KEY (post) REFERENCES posts(id)
+);
+
 INSERT INTO profiles (firstname, lastname, email, timezone, biography) VALUES
     ('John', 'Doe', 'johndoe@morgue.org', NULL, NULL),
     ('Jane', 'Doe', NULL, NULL, 'I sometimes hang with @johndoe.'),
@@ -78,7 +98,7 @@ INSERT INTO posts (author, posted, content) VALUES
     ('johndoe', '2017-05-09 08:23:47.110', 'My first Hubbub post! #JavaRules #J2EERocks'),
     ('johndoe', '2017-06-02 19:00:05.965', 'I''ve invited @janedoe to join.'),
     ('janedoe', '2018-01-13 06:30:45.888', 'Alright, I''ve signed up. Now what?'),
-    ('jilljack', '2019-11-11 23:09:28.027', 'Hey @janedoe and @johndoe! Whazzup in #Hubbub?');
+    ('jilljack', '2019-11-11 23:09:28.027', 'Hey @janedoe and @johndoe! Whazzup in #Hubbub? #JavaRules');
 
 INSERT INTO comments (author, target, comment) VALUES
     ('janedoe', 2, 'I''m here, @johndoe!');
@@ -92,3 +112,14 @@ INSERT INTO mentions (post,subject) VALUES
     (2, 'janedoe'),
     (4, 'janedoe'),
     (4, 'johndoe');
+
+INSERT INTO tags VALUES
+    ('JavaRules', 'johndoe', '2017-05-09 08:23:47.110'),
+    ('J2EERocks', 'johndoe', '2017-05-09 08:23:47.110'),
+    ('Hubbub', 'jilljack', '2019-11-11 23:09:28.027');
+
+INSERT INTO post_tags (tag, post) VALUES
+    ('JavaRules', 1),
+    ('J2EERocks', 1),
+    ('Hubbub', 4),
+    ('JavaRules', 4);
