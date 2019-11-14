@@ -1,4 +1,4 @@
-    package edu.acc.jee.hubbub;
+package edu.acc.jee.hubbub;
 
 import edu.acc.jee.hubbub.domain.Comment;
 import edu.acc.jee.hubbub.domain.DataService;
@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import static edu.acc.jee.hubbub.ContentDecorator.decorate;
+import java.util.Set;
 
 public class FrontController extends HttpServlet {
     private String actionDefault;
@@ -42,7 +44,8 @@ public class FrontController extends HttpServlet {
             case "avatar": destination = avatar(request); break;
             case "revert": destination = revert(request); break;
             case "follow": destination = follow(request); break;
-            case "unfollow":destination = unfollow(request); break;
+            case "unfollow": destination = unfollow(request); break;
+            case "mentions": destination = mention(request); break;
         }
         
         String view;
@@ -119,6 +122,8 @@ public class FrontController extends HttpServlet {
     private String timeline(HttpServletRequest request) {
         if (!loggedIn(request)) return redirectTag + "guest";
         List<Post> posts = getDataService().findPostsByPage(0, pageSize);
+        for (Post post : posts)
+            post.setContent(decorate(post.getContent()));
         request.setAttribute("posts", posts);
         return "timeline";       
     }
@@ -187,7 +192,13 @@ public class FrontController extends HttpServlet {
             request.setAttribute("flash", "There's too much post in yer post! 140 characters max, please.");
             return "post";
         }
-        this.getDataService().addPost(content, user);
+        Post post = this.getDataService().addPost(content, user);
+        Set<String> mentions = MentionFinder.parse(post.getContent());
+        for (String mention : mentions) {
+            User subject = this.getDataService().findUserByUsername(mention);
+            if (subject != null)
+                this.getDataService().addMention(subject, post);
+        }
         return redirectTag + "timeline";       
     }
     
@@ -202,6 +213,8 @@ public class FrontController extends HttpServlet {
         request.setAttribute("post", post);
         if (request.getMethod().equalsIgnoreCase("GET")) {
             List<Comment> comments = getDataService().findCommentsByPostAndPage(post, 0, pageSize);
+            for (Comment c : comments)
+                c.setComment(decorate(c.getComment()));
             request.setAttribute("comments", comments);            
             return "comments";
         }
@@ -210,6 +223,8 @@ public class FrontController extends HttpServlet {
         if (content != null || content.length() > 0 && content.length() <= 70) {
             this.getDataService().addComment(author, post, content);
             List<Comment> comments = getDataService().findCommentsByPostAndPage(post, 0, pageSize);
+            for (Comment c : comments)
+                c.setComment(decorate(c.getComment()));
             request.setAttribute("comments", comments);
         }
         else request.setAttribute("flash", "Your comment must have content.");
@@ -258,6 +273,8 @@ public class FrontController extends HttpServlet {
         if (!loggedIn(request)) return redirectTag + "guest";
         String target = request.getParameter("for");
         List<Post> posts = getDataService().findPostsByAuthorAndPage(target, 0, pageSize);
+        for (Post p : posts)
+            p.setContent(decorate(p.getContent()));
         request.setAttribute("posts", posts);
         return "wall";
     }
@@ -308,6 +325,17 @@ public class FrontController extends HttpServlet {
         else
             getDataService().unfollow(follower, followee);
         return redirectTag + "profile&for=" + targetName;        
+    }
+    
+    private String mention(HttpServletRequest request) {
+        if (!loggedIn(request)) return redirectTag + "guest";
+        String subjectName = request.getParameter("subject");
+        User subject = getDataService().findUserByUsername(subjectName);
+        if (subject == null) return redirectTag + "timeline";
+        List<Post> posts = getDataService().findPostsByMentionOf(subject);
+        for (Post p : posts) p.setContent(decorate(p.getContent()));
+        request.setAttribute("posts", posts);
+        return "mentions";
     }
     
     @SuppressWarnings("unchecked")

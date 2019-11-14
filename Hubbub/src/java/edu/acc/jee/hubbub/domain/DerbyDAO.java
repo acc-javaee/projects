@@ -440,4 +440,53 @@ public class DerbyDAO implements DataService {
         }
     }
 
+    @Override
+    public List<Post> findPostsByMentionOf(User subject) {
+        List<Post> list = new ArrayList<>();
+        final String sql =
+                "SELECT posts.author, posts.content, posts.posted, posts.id FROM " +
+                "posts INNER JOIN mentions ON mentions.post = posts.id WHERE " +
+                "mentions.subject = ? ORDER BY posts.posted DESC";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql)) {
+            pstat.setString(1, subject.getUsername());
+            try (ResultSet rs = pstat.executeQuery()) {
+                while (rs.next()) {
+                    Post post = new Post();
+                    post.setAuthorName(rs.getString("author"));
+                    post.setContent(rs.getString("content"));
+                    post.setPosted(rs.getDate("posted"));
+                    post.setId(rs.getInt("id"));
+                    list.add(post);
+                }
+            }
+        }
+        catch (SQLException sqle) {}
+        finally {
+            return list;
+        }
+    }
+    
+    @Override
+    public Mention addMention(User subject, Post post) {
+        final String sql = "INSERT INTO mentions (subject,post) VALUES (?,?)";
+        try (Connection conn = ds.getConnection();
+             PreparedStatement pstat = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstat.setString(1, subject.getUsername());
+            pstat.setInt(2, post.getId());
+            pstat.executeUpdate();
+            try (ResultSet rs = pstat.getGeneratedKeys()) {
+                rs.next();
+                Mention m = new Mention();
+                m.setId(rs.getInt(1));
+                m.setSubject(subject.getUsername());
+                m.setPost(post.getId());
+                return m;
+            }
+        }
+        catch (SQLException sqle) {
+            return null;
+        }
+    }
+
 }

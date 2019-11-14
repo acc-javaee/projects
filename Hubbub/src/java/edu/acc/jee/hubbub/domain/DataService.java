@@ -30,4 +30,7 @@ public interface DataService {
     boolean unfollow(User follower, User followee);
     List<User> findFolloweesByUser(User user);
     List<User> findFollowersByUser(User user);
+    
+    List<Post> findPostsByMentionOf(User subject);
+    Mention addMention(User subject, Post post);
 }

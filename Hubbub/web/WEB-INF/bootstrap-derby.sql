@@ -1,3 +1,4 @@
+DROP TABLE mentions;
 DROP TABLE following;
 DROP TABLE comments;
 DROP TABLE posts;
@@ -53,6 +54,15 @@ CREATE TABLE following (
     CONSTRAINT fk_followee_user FOREIGN KEY (followee) REFERENCES users(username)
 );
 
+CREATE TABLE mentions (
+    post INTEGER NOT NULL,
+    subject VARCHAR(20) NOT NULL,
+    id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY,
+    CONSTRAINT pk_mentions PRIMARY KEY (id),
+    CONSTRAINT fk_mention_post FOREIGN KEY (post) REFERENCES posts(id),
+    CONSTRAINT fk_mention_subject FOREIGN KEY (subject) REFERENCES users(username)
+);
+
 INSERT INTO profiles (firstname, lastname, email, timezone, biography) VALUES
     ('John', 'Doe', 'johndoe@morgue.org', NULL, NULL),
     ('Jane', 'Doe', NULL, NULL, 'I sometimes hang with @johndoe.'),
@@ -66,8 +76,9 @@ INSERT INTO users (username, passhash, profile) VALUES
 
 INSERT INTO posts (author, posted, content) VALUES
     ('johndoe', '2017-05-09 08:23:47.110', 'My first Hubbub post! #JavaRules #J2EERocks'),
-    ('johndoe', '2017-06-02 19:00:05.965', 'I''ve invited Jane to join.'),
-    ('janedoe', '2018-01-13 06:30:45.888', 'Alright, I''ve signed up. Now what?');
+    ('johndoe', '2017-06-02 19:00:05.965', 'I''ve invited @janedoe to join.'),
+    ('janedoe', '2018-01-13 06:30:45.888', 'Alright, I''ve signed up. Now what?'),
+    ('jilljack', '2019-11-11 23:09:28.027', 'Hey @janedoe and @johndoe! Whazzup in #Hubbub?');
 
 INSERT INTO comments (author, target, comment) VALUES
     ('janedoe', 2, 'I''m here, @johndoe!');
@@ -76,3 +87,8 @@ INSERT INTO following VALUES
     ('johndoe', 'janedoe'),
     ('janedoe', 'johndoe'),
     ('janedoe', 'jilljack');
+
+INSERT INTO mentions (post,subject) VALUES 
+    (2, 'janedoe'),
+    (4, 'janedoe'),
+    (4, 'johndoe');
